@@ -4,36 +4,40 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fastbird.ui.theme.FastBirdTheme
 import kotlinx.coroutines.delay
+import androidx.compose.animation.core.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.material3.Scaffold
+
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
 
 
 class MainActivity : ComponentActivity() {
@@ -41,95 +45,183 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            FastBirdTheme {
-                App()
-
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                FastBirdApp()
             }
         }
     }
 }
 
 @Composable
-fun App() {
+fun FastBirdApp() {
     var showSplash by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        delay(2000)
+        delay(4000) // show splash longer since it has animations
         showSplash = false
-
     }
+
     if (showSplash) {
-        FastBirdSplashScreen()
+        SplashScreen()
     } else {
-        MenuScreen()
+        MainScreen()
     }
 }
 
 @Composable
-fun FastBirdSplashScreen(modifier: Modifier = Modifier) {
+fun SplashScreen() {
+    val fullText = "Fast⚡Bird"
+    var displayedText by remember { mutableStateOf("") }
+
+    // Typing animation
+    LaunchedEffect(Unit) {
+        fullText.forEachIndexed { index, _ ->
+            displayedText = fullText.substring(0, index + 1)
+            delay(120)
+        }
+    }
+
+    // Shimmer animation (light passing effect)
+    val shimmerTranslate = rememberInfiniteTransition()
+    val shimmerX by shimmerTranslate.animateFloat(
+        initialValue = -200f,
+        targetValue = 800f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.3f),
+            Color.White,
+            Color.White.copy(alpha = 0.3f)
+        ),
+        start = Offset(shimmerX, 0f),   // use geometry.Offset
+        end = Offset(shimmerX + 200f, 200f)
+    )
+
+
+    // Snake-like bounce for tagline
+    val infiniteTransition = rememberInfiniteTransition()
+    val bounce by infiniteTransition.animateFloat(
+        initialValue = -8f,
+        targetValue = 8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(600, easing = FastOutLinearInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFBBDEFB))
-            .then(modifier),
+            .background(Color(0xFF1E88E5)), // Blue background
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "FastBird", color = Color.White, fontSize = 40.sp, fontWeight = FontWeight.Bold
-
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MenuScreen() {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("FsTB Menu") })
-        }) { innerPadding ->
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Image(
-                painter = painterResource(R.drawable.coffee),
-                contentDescription = "background image",
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // Shimmered FastBird text
+            Text(
+                text = displayedText,
+                fontSize = 54.sp,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    brush = shimmerBrush
+                )
             )
 
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxSize()
-                    .background(Color(0xFFF1F1F1))
-                    .padding(innerPadding),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Menu", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = {/*TODO: Navigate to Game*/ }) {
-                    Text("Settings")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = {/* TODO: Navigate to Settings */ }) {
-                    Text("Settings")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = {/*TODO:Exit App */ }) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-                }
-            }
+            // Tagline with bounce
+            Text(
+                text = "Increase your pay speed, Save Time!",
+                fontSize = 18.sp,
+                color = Color.Yellow,
+                modifier = Modifier.offset(y = bounce.dp)
+            )
         }
     }
 }
 
-@Preview(showBackground = true)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PreviewApp() {
-    FastBirdTheme {
-       MenuScreen()
+fun MainScreen() {
+    var selectedItem by remember { mutableStateOf(0) }
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("FastBird") },
+                navigationIcon = {
+                    IconButton(onClick = { /* TODO: open drawer or menu */ }) {
+                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { /* TODO: go to profile */ }) {
+                        Icon(Icons.Filled.Person, contentDescription = "You")
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            NavigationBar(containerColor = Color(0xFFFFD1DC)) {
+                val items = listOf(
+                    Icons.Filled.Home to "Home",
+                    Icons.Filled.Search to "Search",
+                    Icons.Filled.ShoppingCart  to "Cart",
+                    Icons.Filled.DateRange  to "Date"
+                )
+
+                items.forEachIndexed { index, (icon, label) ->
+                    val isSelected = selectedItem == index
+
+                    // animate squish offset
+                    val offsetY by animateDpAsState(
+                        targetValue = if (isSelected) 4.dp else 0.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessMedium
+                        )
+                    )
+
+                    NavigationBarItem(
+                        selected = isSelected,
+                        onClick = { selectedItem = index },
+                        icon = {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .offset(y = offsetY) // 👈 rubber squish effect
+                            ) {
+                                Icon(imageVector = icon, contentDescription = label)
+                            }
+                        },
+                        label = { Text(label) }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(Color(0xFFFFD1DC)),
+            contentAlignment = Alignment.Center
+        ) {
+            when (selectedItem) {
+                0 -> Text("Welcome to FastBird 🚀")
+                1 -> Text("Search your Hotels 🔍")
+                2 -> Text("Add to Cart")
+                3 -> Text("Mark The date")
+            }
+        }
     }
 }
