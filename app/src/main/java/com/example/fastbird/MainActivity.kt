@@ -32,12 +32,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+
 
 
 class MainActivity : ComponentActivity() {
@@ -151,7 +156,7 @@ fun SplashScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    var selectedItem by remember { mutableStateOf(0) }
+    var selectedItem by remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -217,10 +222,106 @@ fun MainScreen() {
             contentAlignment = Alignment.Center
         ) {
             when (selectedItem) {
-                0 -> Text("Welcome to FastBird 🚀")
+                0 -> Homescreen()
                 1 -> Text("Search your Hotels 🔍")
                 2 -> Text("Add to Cart")
                 3 -> Text("Mark The date")
+            }
+        }
+    }
+}
+
+@Composable
+fun Homescreen(){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ){
+        Card(
+            modifier= Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            shape= RoundedCornerShape(16.dp),
+            elevation =CardDefaults.cardElevation(8.dp)
+        ) {
+            Text(
+                text = "Choose Hotel",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp)
+
+            )
+        }
+        LazyColumn {
+            item {
+                HotelCard(
+                    hotelName="Mid-city",
+                    meals =listOf("Grilled Chicken", "Burger")
+                )
+            }
+            item {
+                HotelCard(
+                    hotelName= "Lakers Inn",
+                    meals = listOf("beef Steak","Caesar salad")
+                )
+            }
+            item {
+                HotelCard(
+                    hotelName= "Clan Dishes",
+                    meals = listOf("beef Steak","Caesar salad")
+                )
+            }
+            item {
+                HotelCard(
+                    hotelName= "Hashtag",
+                    meals = listOf("beef Steak","Caesar salad")
+                )
+            }
+            item {
+                HotelCard(
+                    hotelName= "Mwashigadi",
+                    meals = listOf("beef Steak","Caesar salad", "ugali", "Wet Fish")
+                )
+            }
+            item {
+                HotelCard(
+                    hotelName= "Jumbo Eats",
+                    meals = listOf("Chips","Caesar salad", "mutton", "kales")
+                )
+            }
+        }
+    }
+
+}
+
+@Composable
+fun HotelCard(hotelName: String, meals: List<String>) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = hotelName, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            meals.forEach { meal ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = meal)
+                    IconButton(onClick = { /* TODO: add to cart */ }) {
+                        Icon(Icons.Default.ShoppingCart, contentDescription = "Add to cart")
+                    }
+                }
             }
         }
     }
