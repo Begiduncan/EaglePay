@@ -1,4 +1,4 @@
-package com.begi.fastbird
+package com.begi.eaglepay
 
 import org.junit.Test
 

@@ -1,3 +1,6 @@
 <resources>
-    <string name="app_name">FastBird</string>
+    <string name="app_name">EaglePay</string>
+    <string name="bottom_nav_home">Home</string>
+    <string name="bottom_nav_cart">Cart\n</string>
+    <string name="bottom_nav_dietmanager">Diet Manager</string>
 </resources>

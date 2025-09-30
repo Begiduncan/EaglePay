@@ -10,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.begi.fastbird"
+    namespace = "com.begi.eaglepay"
     compileSdk = 36
 
     defaultConfig {
@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.foundation.lint)
     implementation(libs.androidx.compose.ui.geometry)
+    implementation(libs.androidx.activity.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -79,5 +80,24 @@ dependencies {
     ksp("androidx.room:room-compiler:$room_version")
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:${room_version}")
+
+    val lifecycle_version = "2.9.4"
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:${lifecycle_version}")
+    // ViewModel utilities for Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:${lifecycle_version}")
+    // LiveData
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:${lifecycle_version}")
+    // Lifecycle utilities for Compose
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version")
+    // Saved state module for ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version")
+    // ViewModel integration with Navigation3
+    implementation("androidx.lifecycle:lifecycle-viewmodel-navigation3:2.10.0-alpha04")
+
+    // compose navigation
+    val nav_version = "2.9.5"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("androidx.navigation:navigation-compose:${nav_version}")
 
 }
