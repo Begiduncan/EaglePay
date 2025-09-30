@@ -1,4 +1,4 @@
-package com.example.fastbird
+package com.begi.fastbird
 
 import org.junit.Test
 

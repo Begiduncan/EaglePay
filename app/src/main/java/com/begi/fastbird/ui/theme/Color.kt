@@ -1,4 +1,4 @@
-package com.example.fastbird.ui.theme
+package com.begi.fastbird.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

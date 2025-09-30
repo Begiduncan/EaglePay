@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.fastbird"
+    namespace = "com.begi.fastbird"
     compileSdk = 36
 
     defaultConfig {
