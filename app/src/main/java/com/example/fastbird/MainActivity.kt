@@ -2,6 +2,7 @@ package com.example.fastbird
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -42,9 +43,12 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
@@ -71,30 +75,32 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun FastBirdApp() {
-    var showSplash by remember { mutableStateOf(true) }
+    var currentScreen by remember { mutableStateOf("Splash") }
 
     LaunchedEffect(Unit) {
-        delay(4000) // show splash longer since it has animations
-        showSplash = false
+        delay(4000) // show splash longer
+        currentScreen = "Main"
     }
 
-    if (showSplash) {
-        SplashScreen()
-    } else {
-        MainScreen()
+    when (currentScreen) {
+        "Splash" -> SplashScreen()
+        "Main" -> MainScreen(
+            onBackToSplash = { currentScreen = "Splash" } // ✅ back handler
+        )
     }
 }
 
+
 @Composable
 fun SplashScreen() {
-    val fullText = "Fast⚡Bird"
+    val fullText = "EaGle⚡Pay"
     var displayedText by remember { mutableStateOf("") }
 
     // Typing animation
     LaunchedEffect(Unit) {
         fullText.forEachIndexed { index, _ ->
             displayedText = fullText.substring(0, index + 1)
-            delay(120)
+            delay(100)
         }
     }
 
@@ -111,9 +117,9 @@ fun SplashScreen() {
 
     val shimmerBrush = Brush.linearGradient(
         colors = listOf(
-            Color.White.copy(alpha = 0.3f),
-            Color.White,
-            Color.White.copy(alpha = 0.3f)
+            Color.Yellow.copy(alpha = 0.3f),
+            Color.Yellow,
+            Color.Yellow.copy(alpha = 0.3f)
         ),
         start = Offset(shimmerX, 0f),   // use geometry.Offset
         end = Offset(shimmerX + 200f, 200f)
@@ -164,49 +170,66 @@ fun SplashScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(onBackToSplash: () -> Unit) {
+    BackHandler {
+        onBackToSplash() // Instead of exiting app, go back to splash
+    }
     var selectedItem by remember { mutableIntStateOf(0) }
     var currentScreen by remember { mutableStateOf("Home") }
     var cartItems by remember { mutableStateOf(listOf<String>()) }
 
-    val hour = remember { java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) }
-    val greeting = when (hour) {
-        in 0..11 -> "Good Morning"
-        in 12..17 -> "Good Afternoon"
-        else -> "Good Evening"}
+    // ✅ Dialog states
+    var showPayDialog by remember { mutableStateOf(false) }
+    var showMpesaPopup by remember { mutableStateOf(false) }
+
+    // ✅ Prices
+    val prices = mapOf(
+        "Grilled Chicken" to 500,
+        "Burger" to 300,
+        "Beef Steak" to 700,
+        "Caesar salad" to 400
+    )
+    val total = cartItems.sumOf { prices[it] ?: 0 }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("FastBird") },
                 navigationIcon = {
-                    IconButton(onClick = { currentScreen = "Menu" }) { // ✅ make menu clickable
+                    IconButton(onClick = { currentScreen = "Menu" }) {
                         Icon(Icons.Filled.Menu, contentDescription = "Menu")
                     }
                 },
                 actions = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "$greeting Begi", // 👈 Greeting with name
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            color = Color.DarkGray,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                        IconButton(onClick = { currentScreen = "Profile" }) {
-                            Icon(Icons.Filled.Person, contentDescription = "Profile")
-
-                        }
-                }
+                    IconButton(onClick = { currentScreen = "Profile" }) {
+                        Icon(Icons.Filled.Person, contentDescription = "Profile")
+                    }
                 }
             )
         },
+
+        // ✅ floating Pay button
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    if (total > 0) {
+                        showPayDialog = true
+                    }
+                },
+                containerColor = Color(0xFF4CAF50)
+            ) {
+                Text("Pay", color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+
         bottomBar = {
-            NavigationBar(containerColor = Color(0xFFADD8E6)) {
+            NavigationBar(containerColor = Color(0xFFFFD1DC)) {
                 val items = listOf(
                     Icons.Filled.Home to "Home",
                     Icons.Filled.Search to "Search",
-                    Icons.Filled.ShoppingCart  to "Cart",
-                    Icons.Filled.DateRange  to "Date"
+                    Icons.Filled.ShoppingCart to "Cart",
+                    Icons.Filled.DateRange to "Date"
                 )
 
                 items.forEachIndexed { index, (icon, label) ->
@@ -228,6 +251,8 @@ fun MainScreen() {
                                 modifier = Modifier
                                     .size(48.dp)
                                     .offset(y = offsetY)
+                                    .fillMaxSize()
+
                             ) {
                                 Icon(imageVector = icon, contentDescription = label)
                             }
@@ -242,7 +267,7 @@ fun MainScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFFADD8E6)),
+                .background(Color(0xFFB3E5FC)), // light blue
             contentAlignment = Alignment.Center
         ) {
             when (selectedItem) {
@@ -254,13 +279,68 @@ fun MainScreen() {
                         )
                         "Diet" -> DietManagerScreen()
                         "Profile" -> ProfileScreen(onBack = { currentScreen = "Home" })
-                        "Menu" -> Text("📋 Menu (drawer placeholder)") // ✅ placeholder for now
+                        "Menu" -> Text("📋 Menu (drawer placeholder)")
                     }
                 }
                 1 -> Text("Search your Hotels 🔍")
                 2 -> CartScreen(cartItems)
                 3 -> Text("Mark The date")
             }
+        }
+
+        // ✅ Payment confirmation dialog
+        if (showPayDialog) {
+            AlertDialog(
+                onDismissRequest = { showPayDialog = false },
+                title = { Text("Confirm Payment") },
+                text = { Text("You are about to pay $total Ksh for your order. Continue?") },
+                confirmButton = {
+                    Button(onClick = {
+                        showPayDialog = false
+                        showMpesaPopup = true  // ✅ trigger STK mock popup
+                    }) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showPayDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
+        // ✅ Mock M-Pesa STK Push Popup
+        if (showMpesaPopup) {
+            AlertDialog(
+                onDismissRequest = { showMpesaPopup = false },
+                title = { Text("M-Pesa") },
+                text = {
+                    Column {
+                        Text("Enter M-Pesa PIN to pay $total Ksh")
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = "",
+                            onValueChange = {},
+                            placeholder = { Text("••••") },
+                            label = { Text("M-Pesa PIN") }
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        showMpesaPopup = false
+                        // Here you can later add success screen or toast
+                    }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showMpesaPopup = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }
